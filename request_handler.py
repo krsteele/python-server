@@ -3,11 +3,31 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from animals import get_all_animals, get_single_animal
 from locations import get_all_locations, get_single_location
 from employees import get_all_employees, get_single_employee
+from customers import get_all_customers, get_single_customer
 
 
 # Here's a class. It inherits from another class.
 class HandleRequests(BaseHTTPRequestHandler):
+    def parse_url(self, path):
+        # Just like splitting a string in JavaScript. If the
+        # path is "/animals/1", the resulting list will
+        # have "" at index 0, "animals" at index 1, and "1"
+        # at index 2.
+        path_params = path.split("/")
+        resource = path_params[1]
+        id = None
 
+        # Try to get the item at index 2
+        try:
+            # Convert the string "1" to the integer 1
+            # This is the new parseInt()
+            id = int(path_params[2])
+        except IndexError:
+            pass  # No route parameter exists: /animals
+        except ValueError:
+            pass  # Request had trailing slash: /animals/
+
+        return (resource, id)  # This is a tuple
     # Here's a class function
     def _set_headers(self, status):
         self.send_response(status)
@@ -39,19 +59,26 @@ class HandleRequests(BaseHTTPRequestHandler):
             else:
                 response = f"{get_all_animals()}"
 
-        if resource == "locations":
+        if resource == "customers":
             if id is not None:
-                response = f"{get_single_location(id)}"
+                response = f"{get_single_customer(id)}"
 
             else:
-                response = f"{get_all_locations()}"
-
+                response = f"{get_all_customers()}"
+        
         if resource == "employees":
             if id is not None:
                 response = f"{get_single_employee(id)}"
 
             else:
                 response = f"{get_all_employees()}"
+
+        if resource == "locations":
+            if id is not None:
+                response = f"{get_single_location(id)}"
+
+            else:
+                response = f"{get_all_locations()}"
 
         self.wfile.write(response.encode())
 
