@@ -161,18 +161,25 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
+        success = False
+
         # Delete a single animal fromt he list
         if resource == "animals":
-            update_animal(id, post_body)
+            success = update_animal(id, post_body)
         # Delete a single customer from the list
-        if resource == "customers":
+        elif resource == "customers":
             update_customer(id, post_body)
         # Delete a single employee from the list
-        if resource == "employees":
+        elif resource == "employees":
             update_employee(id, post_body)
         # Delete a single location from the list
-        if resource == "locations":
+        elif resource == "locations":
             update_location(id, post_body)
+
+        if success: 
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
 
         # Encode the new item and send in response
         self.wfile.write("".encode())
